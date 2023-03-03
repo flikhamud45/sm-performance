@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      serviceAccountName: workload
+      containers:
+        - name: server
+          image: {{ .Values.image }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: "SERVER_DELAY"
+              value: {{ .Values.serverDelayDuration }}
+            - name: "TLS_MODE"
+              value: {{ .Values.servertlsMode }}
+          ports:
+            - containerPort: {{ .Values.serverPort }}
+          volumeMounts:
+            - name: server-cert
+              mountPath: /mnt/tls
+      nodeSelector:
+        group: workload
+      tolerations:
+        - key: "node-role.kubernetes.io/workload"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      volumes:
+        - name: server-cert
+          secret:
+            secretName: {{ .Values.certSecretName }}

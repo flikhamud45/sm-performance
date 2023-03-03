@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: l4-workload
+  namespace: workload
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: simulated-server
+  rules:
+    - to:
+        - operation:
+            ports: ["8080"]

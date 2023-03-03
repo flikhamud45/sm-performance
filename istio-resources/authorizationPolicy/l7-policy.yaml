@@ -1,0 +1,20 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: workload
+  namespace: workload
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: simulated-server
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/workload/sa/workload"]
+      to:
+        - operation:
+            methods: ["GET"]
+            hosts: ["simulated-server.workload.svc.cluster.local", "simulated-server.workload.svc.cluster.local:*"]
+            paths: ["/"]
+            ports: ["8080"]

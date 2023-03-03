@@ -1,0 +1,25 @@
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  name: workload
+  namespace: workload
+spec:
+  podSelector:
+    matchLabels:
+      app: simulated-server
+  port: 8080
+  proxyProtocol: "opaque"
+---
+apiVersion: policy.linkerd.io/v1alpha1
+kind: AuthorizationPolicy
+metadata:
+  name: workload
+  namespace: workload
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: workload
+  requiredAuthenticationRefs:
+    - name: workload
+      kind: ServiceAccount
