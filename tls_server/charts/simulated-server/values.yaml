@@ -1,6 +1,6 @@
 name: simulated-server
 namespace: workload
-image: yanivdocker92/simulated_tls_server:0.0.1
+image: yanivdocker92/simulated_tls_server:0.0.3
 serverPort: 8080
 servertlsMode: NO_AUTH # Possible values: TLS, MTLS, NO_AUTH
 serverDelayDuration: 200ms

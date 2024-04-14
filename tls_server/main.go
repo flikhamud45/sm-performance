@@ -13,11 +13,16 @@ const caPath = "/mnt/tls/ca.crt"   // path to a file that stores the CA certific
 const crtPath = "/mnt/tls/tls.crt" // path to a file that stores the server certificate
 const keyPath = "/mnt/tls/tls.key" // path to a file that stores the server private key
 const listenOn = ":8080"
+const path10kb = "/data10kb"
+const path1mb = "/data1mb"
+const path1gb = "/data1gb"
 
+var filePaths = map[string]string{
+	path10kb: "./www/data/10kb.dat",
+	path1mb:  "./www/data/1mb.dat",
+	path1gb:  "./www/data/1gb.dat",
+}
 var DelayDuration = 0 * time.Second
-
-//const healthListenOn = ":9000"
-//const healthPath = "/healthz"
 
 func createServerConfigWithTls(serverCrtPath, serverKeyPath string) (*tls.Config, error) {
 	cert, err := tls.LoadX509KeyPair(serverCrtPath, serverKeyPath)
@@ -64,6 +69,26 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func bulkDataHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(DelayDuration)
+	path := filePaths[r.URL.Path]
+	var fileBytes []byte
+	var err error
+
+	if path == "" {
+		log.Printf("could not find relevant file for path %s\n", r.URL.Path)
+	} else {
+		fileBytes, err = os.ReadFile(path)
+		if err != nil {
+			log.Printf("failed to read file %v\n", err)
+		}
+	}
+	_, err = w.Write(fileBytes)
+	if err != nil {
+		log.Print("fail to write response body", err)
+	}
+}
+
 func getDelayDuration(delay string) time.Duration {
 	result := 0 * time.Second
 	if delay != "" {
@@ -79,6 +104,9 @@ func getDelayDuration(delay string) time.Duration {
 
 func main() {
 	http.HandleFunc("/", defaultHandler)
+	http.HandleFunc(path10kb, bulkDataHandler)
+	http.HandleFunc(path1mb, bulkDataHandler)
+	http.HandleFunc(path1gb, bulkDataHandler)
 
 	delay := os.Getenv("SERVER_DELAY")
 	if delay != "" {
@@ -121,20 +149,3 @@ func main() {
 		log.Fatalf("failed to activate server on port %s", listenOn)
 	}
 }
-
-//func activateHealthServer() {
-//	http.HandleFunc(healthPath, func(w http.ResponseWriter, r *http.Request) {
-//		w.WriteHeader(http.StatusOK)
-//		_, err := w.Write([]byte("ok"))
-//		if err != nil {
-//			log.Printf("error occurred when writing response to /healthz call : %s", err.Error())
-//		}
-//	})
-//	go func() {
-//		log.Printf("health server listineing on port %s and path %s", healthListenOn, healthPath)
-//		err := http.ListenAndServe(healthListenOn, nil)
-//		if err != nil {
-//			log.Fatalf("failed to activate health server on port %s", healthListenOn)
-//		}
-//	}()
-//}

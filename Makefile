@@ -1,35 +1,9 @@
 
-PROJECT_NAME ?= "" # GCP Project name
-DEPLOYMENT_NAME ?= "sm-perf-testbed" # Deployment name in GCP Deployment Manager
-DEPLOYMENT_CONFIG_FILE ?= "gke.yaml"
-ZONE ?= "us-central1-c"
-SVC_PATCH = '{"spec":{"type":"ClusterIP"}}'
-
-login:
-	gcloud auth login
-	gcloud config set project $(PROJECT_NAME)
-
-create-cluster:
-	gcloud deployment-manager deployments create $(DEPLOYMENT_NAME) --config $(DEPLOYMENT_CONFIG_FILE)
-
-kubectx:
-	gcloud container clusters get-credentials $(DEPLOYMENT_NAME) --zone $(ZONE)
-
-meshery:
-	mesheryctl system start
-	sleep 45
-	kubectl patch svc/meshery -n meshery -p $(SVC_PATCH)
-	kubectl patch svc/meshery-broker -n meshery -p $(SVC_PATCH)
-	kubectl patch deployment/meshery-cilium -n meshery -p '{ "spec": { "template": { "spec": { "serviceAccountName": "meshery-custom" } } } }'
-	oc adm policy add-scc-to-user privileged  -z meshery-custom -n meshery
-	oc adm policy add-scc-to-user privileged  -z meshery-operator -n meshery
-
-
-monitoring:
-	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-	helm repo update
-	helm install sm -f ./monitoring-values.yaml prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
-	kubectl apply -f dashboards/
+#monitoring:
+#	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#	helm repo update
+#	helm install sm -f ./monitoring-values.yaml prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+#	kubectl apply -f dashboards/
 
 
 deploy-fortio:
@@ -48,9 +22,6 @@ prepare-fortio-linkerd:
 
 deploy-server:
 	helm template tls_server/charts/simulated-server/ | kubectl apply -f -
-
-deploy-cilium:
-    cilium install --kube-proxy-replacement=strict --helm-set-string extraConfig.enable-envoy-config=true
 
 deploy-linkerd:
 	oc new-project linkerd-cni
@@ -76,12 +47,15 @@ deploy-linkerd:
 
 deploy-istio:
 	oc adm policy add-scc-to-group anyuid system:serviceaccounts:istio-system
-	#oc adm policy add-scc-to-group privileged system:serviceaccounts:istio-system
-	#oc adm policy add-scc-to-group privileged system:serviceaccounts:istio-cni
-	# To disable protocol sniffing add the following --set values.pilot.enableProtocolSniffingForOutbound=false --set values.pilot.enableProtocolSniffingForInbound=false
-	# Remember to also explicitly use the named Service port (Set tcpOnlyService=true on the simulated server)
-	istioctl install --set profile=openshift --set values.pilot.enableProtocolSniffingForOutbound=false --set values.pilot.enableProtocolSniffingForInbound=false
-	kubectl patch svc/istio-ingressgateway -n istio-system -p $(SVC_PATCH)
-	#kubectl patch svc/istio-ingressgateway -n istio-system -p '{"spec":{"type":"ClusterIP"}}'
+	istioctl install --set profile=openshift
 	oc -n istio-system expose svc/istio-ingressgateway --port=http2
 	oc adm policy add-scc-to-group anyuid system:serviceaccounts:workload
+
+http-test:
+	sh test-scripts/fortio/run-http-test.sh
+
+tls-test:
+	sh test-scripts/fortio/run-tls-test.sh
+
+mtls-test:
+	sh test-scripts/fortio/run-mtls-test.sh
