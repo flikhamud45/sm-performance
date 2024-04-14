@@ -127,7 +127,7 @@ To access these files you should `exec` into the load-generator Pod. Follow the 
 ```shell script
 kubectl get pods -n workload -l app=workload
 ```
-* Exec into the load-generator container (make sure to replace <load-generator-pod-name> with the name you got from step 1):
+* Exec into the load-generator container (make sure to replace `<load-generator-pod-name>` with the name you got from step 1):
 ```shell script
 kubectl exec -i -t -n workload  <load-generator-pod-name> -c workload "--" sh -c "clear; (bash || ash || sh)"
 ```
