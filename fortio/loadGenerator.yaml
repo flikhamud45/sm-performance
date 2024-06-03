@@ -15,7 +15,7 @@ spec:
       labels:
         app: fortio-workload
     spec:
-      serviceAccountName: workload
+      serviceAccountName: fortio-workload
       securityContext:
         runAsUser: 0
       containers:
@@ -36,4 +36,10 @@ spec:
         - name: server-cert
           secret:
             secretName: simulated-server-cert
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+ name: workload
+ namespace: workload
 ---

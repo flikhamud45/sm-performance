@@ -1,13 +1,12 @@
 
-# Test parameters (default values are defined after the colons
+# Test parameters (default values are defined after the colons)
 TEST_DURATION="${test_duration:-300s}"
 CONNECTIONS="${connections:-10}"
 QUITE_TIME_SECONDS="${quiet_time_seconds:-120}"
 ITERATIONS="${iterations:-1}"
 RPS="${rps:-10}"
 
-# light test
-echo "starting HTTP test"
+echo "starting $ITERATIONS iterations of the TLS test. Each test will run for $TEST_DURATION with $CONNECTIONS connections and $RPS RPS. There will be $QUITE_TIME_SECONDS seconds between each test."
 for ((i=1; i <= ITERATIONS; i++)); do
    echo "starting iteration number ${i} of the test"
    kubectl exec $(kubectl get pods -n workload -l app=fortio-workload -o custom-columns=:.metadata.name --no-headers) -n workload -c workload -- fortio load -a -timeout 10000ms -cacert //mnt/tls/ca.crt -qps "$RPS" -c "$CONNECTIONS" -t "$TEST_DURATION"  https://simulated-server.workload.svc.cluster.local:8080/

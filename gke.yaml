@@ -1,0 +1,36 @@
+resources:
+  - name: sm-perf-testbed
+    type: container.v1.cluster
+    properties:
+      zone: us-central1-c
+      cluster:
+        initialClusterVersion: "1.26.15-gke.1381000"
+        nodePools:
+          - name: workload
+            version: "1.26.15-gke.1381000"
+            config:
+              machineType: n2d-highcpu-8
+              imageType: "cos_containerd"
+              diskSizeGb: 50
+              labels:
+                group: workload
+              taints:
+                - key: "node-role.kubernetes.io/workload"
+                  value: "true"
+                  effect: "NO_SCHEDULE"
+            initialNodeCount: 1
+            locations:
+              - us-central1-c
+          - name: system
+            version: "1.26.15-gke.1381000"
+            config:
+              machineType: n2d-standard-4
+              imageType: "cos_containerd"
+              diskSizeGb: 50
+            initialNodeCount: 1
+            locations:
+              - us-central1-c
+        locations:
+          - us-central1-c
+        loggingService: "none"
+        monitoringService: "monitoring.googleapis.com/kubernetes"
