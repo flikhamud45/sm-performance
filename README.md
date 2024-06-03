@@ -153,6 +153,8 @@ make deploy-server
 ```
 The above script should create three resources: `Deployment`, which creates a Pod that runs the simulated server, a `Service`, and a `Secret` that stores the client and server certificates (for TLS/mTLS tests).  
 
+The source code of the simulated server can be found in the `tls_server` folder of this repository.  
+
 ## Run the Tests
 This repository provides three kinds of tests:
 1. HTTP test: client-to-server communication with no TLS configurations on the client/server side. Deploy the server with `servertlsMode: NO_AUTH` before running this test.  
