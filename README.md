@@ -119,12 +119,12 @@ Notes:
 2. To ensure separation from other components deployed in the cluster such as the monitoring tools, you should define at least one Node with appropriate `taints`. The load generator and the server are already configured to tolerate those taints. For more information about taints and tolerations click [here](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/).  
 To taint your Node run the following command (make sure to replace \<node-name\> with one of your Nodes' name)
 ```shell
-kubectl taint nodes \<node-name\> node-role.kubernetes.io/workload=true:NoSchedule
+kubectl taint nodes <node-name> node-role.kubernetes.io/workload=true:NoSchedule
 ```
 3. The load generator and the server's Deployment resources are defined with a `nodeSelector` that ensures their Pods will be scheduled only on the designated Nodes (labeled as `group: workload`). Make sure your at least one of your Nodes is labeled with `group: workload` label.
 To label your Node run the following command (make sure to replace \<node-name\> with one of your Node's name)
 ```shell
-kubectl label nodes \<node-name\> group=workload
+kubectl label nodes <node-name> group=workload
 ```
 
 #### Load Generator
