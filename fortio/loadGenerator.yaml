@@ -15,7 +15,7 @@ spec:
       labels:
         app: fortio-workload
     spec:
-      serviceAccountName: fortio-workload
+      serviceAccountName: workload
       securityContext:
         runAsUser: 0
       containers:
