@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Define an array of tuples (each tuple is an array with two elements)
+experiments=(
+    "1000 3200"
+    "1200 3200"
+    "1400 3200"
+    "1600 3200"
+    "1800 3200"
+    "2000 3200"
+    "2200 3200"
+    "2400 3200"
+    "2600 3200"
+    "2800 3200"
+    "3000 3200"
+    "3200 3200"
+)
+echo > exps_times.txt
+
+# Loop through each experiment in the array
+for experiment in "${experiments[@]}"; do
+    # Split the tuple into separate variables
+    IFS=' ' read -r connections rps <<< "$experiment"
+    
+    # Print the experiment and the current time
+    echo "Experiment: connections=$connections, rps=$rps, time=$(date)"
+    echo "Experiment: connections=$connections, rps=$rps, time=$(date)" >> exps_times.txt
+    # Call make mtls-test with the parameters
+    make http-test connections=$connections rps=$rps quiet_time_seconds=120 iterations=1 test_duration=300s
+done

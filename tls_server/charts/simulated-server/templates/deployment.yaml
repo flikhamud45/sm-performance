@@ -31,7 +31,7 @@ spec:
             - name: server-cert
               mountPath: /mnt/tls
       nodeSelector:
-        group: workload
+        group2: server
       tolerations:
         - key: "node-role.kubernetes.io/workload"
           operator: "Equal"

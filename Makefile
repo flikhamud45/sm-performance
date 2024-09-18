@@ -1,6 +1,6 @@
-PROJECT_NAME ?= "" # GCP Project name
+PROJECT_NAME ?= "sunny-equinox-429014-m5" # GCP Project name
 DEPLOYMENT_NAME ?= "sm-perf-testbed" # Deployment name in GCP Deployment Manager
-DEPLOYMENT_CONFIG_FILE ?= "gke.yaml"
+DEPLOYMENT_CONFIG_FILE ?= "gke"
 ZONE ?= "us-central1-c"
 
 monitoring:
@@ -12,6 +12,10 @@ monitoring:
 
 deploy-gke: gke-login create-gke-cluster kubectx
 
+deploy-gke-2nodes:
+	make deploy-gke DEPLOYMENT_CONFIG_FILE:=$(DEPLOYMENT_CONFIG_FILE)"-2nodes"
+
+
 destroy-gke:
 	gcloud deployment-manager deployments delete $(DEPLOYMENT_NAME) --delete-policy=DELETE
 
@@ -20,7 +24,7 @@ gke-login:
 	gcloud config set project $(PROJECT_NAME)
 
 create-gke-cluster:
-	gcloud deployment-manager deployments create $(DEPLOYMENT_NAME) --config $(DEPLOYMENT_CONFIG_FILE)
+	gcloud deployment-manager deployments create $(DEPLOYMENT_NAME) --config $(DEPLOYMENT_CONFIG_FILE).yaml
 
 kubectx:
 	gcloud container clusters get-credentials $(DEPLOYMENT_NAME) --zone $(ZONE)
@@ -43,7 +47,11 @@ prepare-fortio-istio-okd:
 prepare-fortio-istio:
 	kubectl create ns workload --dry-run=client -o yaml | kubectl apply -f -
 	kubectl label ns workload istio-injection=enabled
-	
+
+prepare-fortio-istio-ambient:
+	kubectl create ns workload --dry-run=client -o yaml | kubectl apply -f -
+	kubectl label ns workload istio.io/dataplane-mode=ambient
+
 prepare-fortio-linkerd:
 	kubectl create ns workload --dry-run=client -o yaml | kubectl apply -f -
 	kubectl annotate ns workload linkerd.io/inject=enabled
@@ -89,6 +97,9 @@ deploy-istio-okd:
 
 deploy-istio:
 	istioctl install
+
+deploy-istio-ambient:
+	istioctl install --set profile=ambient
 
 http-test:
 	bash test-scripts/fortio/run-http-test.sh
