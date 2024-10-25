@@ -108,7 +108,7 @@ For instructions on how to install Cilium on an any other cluster cluster visit 
 #### Istio-Ambient
 To install Istio-Ambient, run the following command in your terminal:
 ```shell script
-make deploy-istio-שצנןקמא
+make deploy-istio-ambient
 ```
 After the installation is complete, ensure all the pods in the `istio-system` namespace are up and running.
 ```shell script
