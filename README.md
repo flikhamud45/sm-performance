@@ -105,6 +105,21 @@ The above command creates the `workload` namespace and labels it with the `linke
 For instructions on how to install Cilium on an OKD cluster visit [here](https://docs.cilium.io/en/latest/installation/k8s-install-openshift-okd/#k8s-install-openshift-okd).  
 For instructions on how to install Cilium on an any other cluster cluster visit [here](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/).  
 
+#### Istio-Ambient
+To install Istio-Ambient, run the following command in your terminal:
+```shell script
+make deploy-istio-שצנןקמא
+```
+After the installation is complete, ensure all the pods in the `istio-system` namespace are up and running.
+```shell script
+kubectl get pods -n istio-system
+```
+To configure Istio-ambient to inject its sidecar proxies into the workload nodes run the following command:
+```shell script
+make prepare-fortio-istio-ambient
+```
+The above command creates the `workload` namespace and labels it with the `dataplane-mode=ambient` label.
+
 ### Deploy the Monitoring Tools
 If you created an OKD cluster, you can skip this part because OKD installation already includes monitoring tools. For any other cluster, run the following command in your terminal (make sure your working directory is at the root of this project):  
 ```shell script
